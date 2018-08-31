@@ -11,9 +11,9 @@
 
 // global variables
 var selectedCity = "Tucson, AZ" //default location;
-var weatherReport = null;
+var weatherReport = null;//hold our data
 //var to hold our XHR object
-var httpRequest = false;
+var httpRequest = false;// have an XHR object?
 
 //function to get a request object
 function getRequestObject() {
@@ -28,6 +28,21 @@ function getRequestObject() {
     }
     return httpRequest;
 
+}
+//function is an event handler for onreadystatechange
+//get the weather data if it works
+function fillWeather () {
+    //check the readyState
+    if(httpRequest.readyState === 4 && httpRequest.status === 200){
+        weatherReport = JSON.parse(httpRequest.responseText);
+        var days = ["Sunday", "Monday", "Tuesday", "Thursday", "Friday", "Saturday"];
+        var dateValue = new Date(weatherReport.daily.data[0].time);
+        var dayOfWeek = dateValue.getDay();
+        var rows = document.querySelectorAll("section.week table tbody tr");
+        document.querySelector("section.week table caption").innerHTML = selectedCity;
+        document.querySelector("section.week table caption").style.display = "block";
+        document.querySelector("section.week table").style.display = "inline-block";
+    }
 }
 //get the weather in response to click events on city location
 //and for default city on page load
@@ -60,6 +75,8 @@ function getWeather(evt) {
     //target request
     httpRequest.open("get", "solar.php?" + "lat=" + latitude + "&lng=" + longitude, true);
     httpRequest.send(null);
+    //event listener for onreadustatechange
+    httpRequest.onreadystatechange = fillWeather;
 }
 //retrieve li elements holding city location choices
 var locations = document.querySelectorAll("section ul li");
